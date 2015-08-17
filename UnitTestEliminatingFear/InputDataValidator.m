@@ -57,14 +57,14 @@ static const NSInteger UserNameMaximalLength = 16;
     BOOL nameIsValid = [self validateStringInCharacterSet:candidate characterSet:characterSet];
     if (!nameIsValid) {
         self.errorMessage = @"Name can contain only letters (a-z), hyphens (-) and apostrophe (').";
-       
+        
         return nameIsValid;
     }
     
     nameIsValid = candidate.length >= 2 && candidate.length <= 16;
     if (!nameIsValid) {
         self.errorMessage = @"Name length should be between 2 and 16 characters long";
-      
+        
         return nameIsValid;
     }
     
@@ -128,41 +128,27 @@ static const NSInteger UserNameMaximalLength = 16;
 
 - (NSString *)addPrefixToURL:(NSString *)url {
     if ([url isEqualToString:@""]) return url;
-    NSString *cleanString = [self stringByRemovingWebSymbolsFromString:url];
-    NSString *www = [self extensionForURL:cleanString];
-    NSString *prefix = [self prefixForUrl:url];
-    
-    return [NSString stringWithFormat:@"%@://%@%@", prefix, www, cleanString];
-}
-
-
-- (NSString *)prefixForUrl:(NSString *)url {
     NSString *http = @"http";
     NSString *https = @"https";
     
-    return [self doesStringContainHTTPS:url] ? https : http;
-}
-
-
-- (NSString *)extensionForURL:(NSString *)url {
-    return [self hasDomein:url] ? @"" :@"www." ;
-}
-
-
-- (BOOL)doesStringContainHTTPS:(NSString *)stringToCheck {
-    return [stringToCheck rangeOfString:@"https"].location != NSNotFound;
-}
-
-
-- (NSString *)stringByRemovingWebSymbolsFromString:(NSString *)string {
-    NSString *http = @"http";
-    NSString *https = @"https";
-    NSString *cleanString = [string stringByReplacingOccurrencesOfString:https withString:@""];
-    cleanString = [cleanString stringByReplacingOccurrencesOfString:http withString:@""];
-    cleanString = [cleanString stringByReplacingOccurrencesOfString:@":" withString:@""];
-    cleanString = [cleanString stringByReplacingOccurrencesOfString:@"//" withString:@""];
+    BOOL containHttps = [url rangeOfString:https].location != NSNotFound;
+    url = [url stringByReplacingOccurrencesOfString:https withString:@""];
+    url = [url stringByReplacingOccurrencesOfString:http withString:@""];
+    url = [url stringByReplacingOccurrencesOfString:@":" withString:@""];
+    url = [url stringByReplacingOccurrencesOfString:@"//" withString:@""];
     
-    return cleanString;
+    NSString *fullURL = @"";
+    NSString *www = @"";
+    if (![self hasDomein:url]) {
+        www = @"www.";
+    }
+    if (containHttps) {
+        fullURL = [NSString stringWithFormat:@"%@://%@%@", https, www, url];
+    } else {
+        fullURL = [NSString stringWithFormat:@"%@://%@%@", http, www, url];
+    }
+    
+    return fullURL;
 }
 
 @end
